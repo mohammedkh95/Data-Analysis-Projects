@@ -1,33 +1,55 @@
-For this project, and perhaps the (TO BE CONTINUED)
+For this project, and perhaps the most entertaining project I've done to date. Whilst sitting with my thoughts, I realised an authentic dataset from a real comnay would probably have at minimum 3 sheets in one dataset. And thats what I did. Obviously I asked ChatGPT to conjure a dataset for me with the conditions of have multiple sheets that I will have to do relationships on Power BI. And it did not fail It gave me a wonderful CRM dataset. The dataset was an absolut mess. It needed a lot of cleaning, string normalizing, alot of stripping, date normalizing etc.
 
-import pandas as pd
-import re
-all_sheets = pd.ExcelFile(r'C:\Users\moham\OneDrive\Desktop\Python\DA\Voltmart\voltmart_multi_sheet.xlsx')
+Anyways, I set to work cleaning.
 
-# CUSTOMER SHEET
-df_cust = all_sheets.parse('Customers')
+# Step 1 - Importing packages
 
-# Select columns to strip leading/trailing spaces
-strip_cols = df_cust.select_dtypes(include=['object']).columns
-# Strip leading/trailing spaces overall
-df_cust[strip_cols] = df_cust[strip_cols].apply(lambda x: x.str.strip())
+<img width="235" height="52" alt="image" src="https://github.com/user-attachments/assets/b7bdcbd5-e15d-4289-a8ed-105e3fc499fa" />
 
-# Normalize strings
-title_cols = ['Full Name','City','Country','Churned']
+Obviously 'pandas' for pre-processing tasks and 're (regular expression)' to support regex operations.
 
-df_cust[title_cols] = df_cust[title_cols].apply(lambda x: x.str.title())
+# Step 2 - Uploading datset
+<img width="873" height="35" alt="image" src="https://github.com/user-attachments/assets/f3715b84-6ab1-421f-861e-42739219c992" />
 
-# Signup Date
+Previous datasets I would run 'pd.read_exel' for a single sheet dataset. However, this dataset had multiple sheets and the normal '.read._excel' didnt work. I did some research and realised there's another built-in code to use, '.ExcelFile'. The rest of the operation is similar to the previous ones, the only difference is the extensions.
+
+# Step 3 - EDA per sheet
+## CUSTOMER SHEET
+
+<img width="1314" height="462" alt="image" src="https://github.com/user-attachments/assets/f6b0c144-81b0-4ff7-a4c4-e8dcca28c38e" />
+
+#### Accessing customer sheet
+
+To access one hseet in a multiple sheet dataste, the following code must be applied *df_cust = all_sheets.parse('Customers')*
+
+- *df_cust* = Assigning a name to the sheet
+- *all_sheets* = Name of imported dataset
+- *.parse('Customers')* = Read a specific sheet name in the dataset. The name must be identical to that in the dataset
+
+<b>Stripping leading/trailing spaces</b>
+
+Instead of stripping the spaces column by column, I learnt how to strip them all at once...with a condition
+
+<b>Select columns and apply</b>
+
+1. *strip_cols = df_cust.select_dtypes(include=['object']).columns*
+
+2. *df_cust[strip_cols] = df_cust[strip_cols].apply(lambda x: x.str.strip())*
+
+Firstly, store the columns in a variable. The condition here was to store all columns of 'object' datatype then applying it using a lambda function. Easy as that and it literally strips time from doing it per column. Moving forward, I can use such codes to title, capitlize, upper, lower etc columns name sinstead of doing them manually one by one.
+
+### Signup Date
 df_cust['Signup Date'] = pd.to_datetime(df_cust['Signup Date'], format='mixed', errors='coerce')
 df_cust['Signup Date'] = df_cust['Signup Date'].dt.strftime('%Y-%m-%d')
 
-# Country
+### Country
 country_list = {'Mexico':'Mexico', 'Usa':'United States', 'Canada':'Canada', 'Mex':'Mexico', 'U.S.':'United States', 'United States':'United States', 'Can':'Canada'}
 df_cust['Country']=df_cust['Country'].map(country_list)
 
-# Churned
+### Churned
 churned = {'Yes':'Yes','No':'No','Y':'Yes','N':'No'}
 df_cust['Churned']=df_cust['Churned'].map(churned)
+
 # PRODUCT SHEET
 
 df_prod = all_sheets.parse('Products')
